@@ -6,7 +6,7 @@
 
 ## 版本提示
 1. Vue2.x npm链接  或 npm install vue-online-signature --save
-2. Vue2.x gitee链接 https://github.com/awfifnypm/vue-online-signature
+2. Vue2.x gitee链接 https://gitee.com/awfifnypm/vue-online-signature
 
 ## 功能
 1. 兼容 PC 和 Mobile；
@@ -17,6 +17,7 @@
 6. 自定义画布背景（支持图片及图片背景重复）
 7. 自定义导出图背景（支持图片及图片背景重复，可生成与画布背景不一样背景的图片）
 8. 导出图片格式为 `base64`；
+9. 初始化布画恢复历史绘制数据或在已经的画布上恢复历史绘制数据
 [示例demo](http://b.wujiang.pro/)
 
 注： 本组件是基于vue-esign插件基础上进行二开和修改，使用方法与vue-esign插件有差异，建议查看本插件文档
