@@ -58,16 +58,20 @@ const params = reactive<object>({
     imgBack: '',
     isRepeat: '',
     noRotation: false,
-    backIsCenter: false
+    backIsCenter: false,
+    recoverPoints: []
   })
 let vueSignatureRef = ref<any>(null)
 const handleReset = () => {
     vueSignatureRef.value.reset()
   },
 const = handleGenerate = () => {
-    vueSignatureRef.value.confirm().then(res => {
-      this.resultImg = res
-    }).catch(err => {
+    vueSignatureRef.value.confirm()
+    .then((res:{base64: string, points: any}) => {
+        imagesSRC.value = res.base64
+        sessionStorage.setItem('points', JSON.stringify(res.points))
+    })
+    .catch(err => {
       alert(err) // 画布没有签字时会执行这里 'Not Signned'
     })
   }
@@ -94,16 +98,19 @@ const = handleGenerate = () => {
 | verticalDeductHeight | Number | 0 | 获取屏幕的宽高生成画布尺时，竖屏时高度需要减除的尺寸 |
 | acrossDeductWidth | Number | 0 | 获取屏幕的宽高生成画布尺时，横屏时宽度需要减除的尺寸 |
 | acrossDeductHeight | Number | 0 | 获取屏幕的宽高生成画布尺时，横屏时高度需要减除的尺寸 |
+| recoverPoints | Array | [] | 初始生成布画时，需要恢复到canvas画布上的笔画数据（此数据结构必须是confirm方法返回的结构，结构：[{x:0,y:0,direction:'across'}], direction参数有across和vertical） |
+
 
 | 方法  | 参数 | 说明 |
 | :-: | :-- | :-- |
 | onDrawingStatus | status | 返参可监听画板是否已绘画，true或false |
+| recoverDraw | Array | 通过此方式可在已生成的画布上，把已有的绘制笔画数据覆盖上去，（此数据结构必须是confirm方法返回的结构，结构：[{x:0,y:0,direction:'across'}], direction参数有across和vertical） |
 | onMouseDown | event | PC 当鼠标指针移动到元素上方，并按下鼠标按键（左、右键均可）时，会发生mousedown事件。 |
 | onMouseMove | event | PC 当鼠标指针移动时发生的事件。 |
 | onMouseUp | event | PC 当在元素上松开鼠标按键（左、右键均可）时，会发生 mouseup 事件。 |
 | onTouchStart | event | Mobile 当手指触摸屏幕时候触发。 |
-| onTouchMove | event | 当手指在屏幕上滑动的时候连续地触发。 |
-| onTouchEnd | event | 当手指从屏幕上离开的时候触发。 |
+| onTouchMove | event | Mobile 当手指在屏幕上滑动的时候连续地触发。 |
+| onTouchEnd | event | Mobile 当手指从屏幕上离开的时候触发。 |
 
 两个内置方法，通过给组件设置 `ref` 调用：
 
@@ -113,9 +120,12 @@ vueSignatureRef.value.reset()
 ```
 **生成图片**
 ```js
-vueSignatureRef.value.confirm.then(res => {
-  console.log(res) // base64图片
-}).catch(err => {
+vueSignatureRef.value.confirm
+.then((res:{base64: string, points: any}) => {
+  imagesSRC.value = res.base64
+  sessionStorage.setItem('points', JSON.stringify(res.points))
+})
+.catch(err => {
   alert(err) // 画布没有签字时会执行这里 'Not Signned'
 })
 ```

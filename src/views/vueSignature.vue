@@ -5,6 +5,11 @@
 <script setup lang="ts">
     import { ref, reactive, watch, computed, onMounted, nextTick, onBeforeMount, onUnmounted, toRaw } from 'vue'
     const emits = defineEmits(['onDrawingStatus', 'onMouseDown', 'onMouseMove', 'onMouseUp', 'onTouchStart', 'onTouchMove', 'onTouchEnd'])
+    interface pointsType {
+      x: number,
+      y: number,
+      direction: string
+    }
     interface Props {
         width?: number,
         height?: number,
@@ -23,7 +28,8 @@
         acrossDeductWidth?: number,
         acrossDeductHeight?: number
         verticalDeductWidth?: number,
-        verticalDeductHeight?: number
+        verticalDeductHeight?: number,
+        recoverPoints?: pointsType[]
     }
     const props = withDefaults(defineProps<Props>(), {
         width: 0,
@@ -43,7 +49,8 @@
         verticalDeductWidth: 0,
         verticalDeductHeight: 0,
         acrossDeductWidth: 0,
-        acrossDeductHeight: 0
+        acrossDeductHeight: 0,
+        recoverPoints: () => []
     })
 
     const hasDrew = ref<boolean>(false)
@@ -90,8 +97,8 @@
       canvasTxt!.value!.fillStyle = pat; 
       canvasTxt.value?.fill();
       if (status) {
-            autoDraw(null, null)
-        }
+          autoDraw(null, null)
+      }
     }
     const setCanvasBack = (status: any) => {
        const canvas = canvasRef.value as HTMLCanvasElement
@@ -265,7 +272,7 @@
         getImages()
         getDomSize()
         window.addEventListener("orientationchange", orientationchangeEvent)
-        resizeHandler(false)
+        resizeHandler(props.recoverPoints && props.recoverPoints.length ? true : false)
         // 在画板以外松开鼠标后冻结画笔
         document.onmouseup= () => {
            isDrawing.value = false
@@ -399,10 +406,14 @@
       points.value.push({x: -1, y: -1})
     }
     const autoDraw = (canvasRefs: HTMLCanvasElement | null, canvas2d: CanvasRenderingContext2D | null) => {
-        if (points.value && points.value.length) {
+        if (points.value && points.value.length || props.recoverPoints && props.recoverPoints.length) {
           let canvas = canvasRefs || canvasRef.value as HTMLCanvasElement
           let canvasText = canvas2d || canvasTxt.value
-            points.value.reduce((acc, cur) => {
+          let pointsList = props.recoverPoints && props.recoverPoints.length ? props.recoverPoints : points.value
+          if (pointsList && pointsList.length) {
+            hasDrew.value = true
+          }
+          pointsList.reduce((acc, cur) => {
               if (cur.x != -1 && cur.y != -1 && acc.x != -1 && acc.y != -1) {
                   canvasText?.beginPath()
                   let position = { accX: acc.x, accY: acc.y, curX: cur.x, curY: cur.y }
@@ -470,7 +481,10 @@
         let edg = (props.fullScreen && ((window.orientation == 0 || window.orientation == 180) || ((window.orientation == 90 || window.orientation == -90) && !props.noRotation))) || (window.orientation === undefined) && props.noRotation ? props.edg : 0
         rotateBase64Img(resultImgs, edg)
         .then(base64 => {
-            resolve(base64)
+            resolve({
+              base64, 
+              points: points.value
+            })
         })
       })
     }
@@ -537,6 +551,19 @@
         const data = [topX, topY, btmX, btnY]
         return data
     }
+    const recoverDraw = (pointsList: pointsType[]) => {
+      let canvas = canvasRef.value as HTMLCanvasElement
+      canvasTxt.value?.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      )
+      points.value = pointsList
+      hasDrew.value = true
+      resultImg.value = ''
+      setCanvasBack(true)
+    }
     onBeforeMount(() =>  {
       if (props.fullScreen) {
         let bodyDom = document.getElementsByTagName('body')
@@ -554,7 +581,8 @@
     })
     defineExpose({
         confirm: toRaw(confirm),
-        reset
+        reset,
+        recoverDraw
     })
 
 </script>

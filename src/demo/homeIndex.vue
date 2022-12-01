@@ -100,6 +100,7 @@
      <div class="buttonList" v-if="isShow">
          <div  class="button"  @click="confirm">生成</div>
          <div  class="button"  @click="reset">重置</div>
+         <div  class="button"  @click="recover">恢复</div>
      </div>
    </div>
 </template>
@@ -109,6 +110,7 @@ import vueOnlineSignature from '@/views/vueSignature.vue';
 // import vueOnlineSignature from 'vue3-online-signature'
 import { ref, toRaw, reactive } from 'vue'
 const isShow = ref<boolean>(false)
+const isExistPoints = ref<boolean>(false)
 const params = reactive<any>({
       width: 0,
       height: 0,
@@ -127,21 +129,32 @@ const params = reactive<any>({
       verticalDeductWidth: 10,
       verticalDeductHeight: 24,
       acrossDeductWidth: 30,
-      acrossDeductHeight: 20
+      acrossDeductHeight: 20,
+      recoverPoints: []
     })
 let vueSignatureRef = ref<any>(null)
 const imagesSRC = ref<string>('')
 const confirm = () => {
    vueSignatureRef.value.confirm()
-   .then((res:string) => {
-      imagesSRC.value = res
+   .then((res:{base64: string, points: any}) => {
+      imagesSRC.value = res.base64
+      sessionStorage.setItem('points', JSON.stringify(res.points))
    })
-   .catch(err => {
+   .catch((err: any) => {
       alert('请先绘画')
    })
 }
 const reset = () => {
    vueSignatureRef.value.reset()
+}
+const recover = () => {
+   let data = sessionStorage.getItem('points')
+   let list = data ? JSON.parse(data) : []
+   if (!list.length) {
+      alert('请先绘画后，再点击生成，刷新后的点击恢复即可恢复上次生成的笔画')
+      return false
+   }
+   vueSignatureRef.value.recoverDraw(list)
 }
 const generate = () => {
    imagesSRC.value = ''
