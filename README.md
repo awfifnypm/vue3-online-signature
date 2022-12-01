@@ -121,7 +121,7 @@ vueSignatureRef.value.reset()
 ```
 **生成图片**
 ```js
-vueSignatureRef.value.confirm
+vueSignatureRef.value.confirm()
 .then((res:{base64: string, points: any}) => {
   imagesSRC.value = res.base64
   sessionStorage.setItem('points', JSON.stringify(res.points))
