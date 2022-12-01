@@ -6,7 +6,7 @@
 
 ## 版本提示
 1. Vue2.x npm链接  或 npm install vue-online-signature --save
-2. Vue2.x gitee链接 https://gitee.com/awfifnypm/vue-online-signature
+2. Vue2.x gitee链接 https://github.com/awfifnypm/vue-online-signature
 
 ## 功能
 1. 兼容 PC 和 Mobile；
